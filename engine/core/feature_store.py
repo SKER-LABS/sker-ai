@@ -98,3 +98,77 @@ class FeatureStore:
     def missing_features(self) -> list[str]:
         return [
             name for i, name in enumerate(FEATURE_NAMES)
+            if np.isnan(self._vector[i])
+        ]
+
+    def normalize(self) -> np.ndarray:
+        """Min-max normalization. NaN replaced with 0.5 (neutral)."""
+        vec = self._vector.copy()
+        nan_mask = np.isnan(vec)
+
+        # HACK: skip normalization for boolean features (already 0/1)
+        bool_features = {
+            "bundle_detected", "lp_locked", "mint_authority_revoked",
+            "goplus_honeypot", "jupiter_verified", "coingecko_listed",
+            "github_has_real_code", "scam_db_match", "lp_burned_pct",
+        }
+        bool_indices = [i for i, n in enumerate(FEATURE_NAMES) if n in bool_features]
+
+        # normalize continuous features only
+        for i in range(len(vec)):
+            if i in bool_indices or nan_mask[i]:
+                continue
+            # empirical ranges per feature — TODO: switch to data-driven dynamic ranges
+            vec[i] = np.clip(vec[i], 0, _MAX_VALS.get(FEATURE_NAMES[i], 1e9))
+            max_v = _MAX_VALS.get(FEATURE_NAMES[i], 1.0)
+            if max_v > 0:
+                vec[i] = vec[i] / max_v
+
+        vec[nan_mask] = 0.5
+        return vec
+
+    def to_dict(self) -> dict:
+        return {
+            "ca": self.ca,
+            "fill_rate": round(self.fill_rate, 3),
+            "missing": self.missing_features,
+            "features": {
+                name: (None if np.isnan(self._vector[i]) else round(float(self._vector[i]), 6))
+                for i, name in enumerate(FEATURE_NAMES)
+            },
+        }
+
+
+# empirical max values for normalization — needs periodic updates
+# FIXME: replace hardcoded values with rolling percentiles from redis
+_MAX_VALS = {
+    "market_cap_usd": 1_000_000_000,
+    "liquidity_usd": 50_000_000,
+    "liq_mcap_ratio": 1.0,
+    "volume_24h": 100_000_000,
+    "vol_mcap_ratio": 5.0,
+    "buy_sell_ratio_24h": 10.0,
+    "holder_count": 100_000,
+    "top1_holder_pct": 100.0,
+    "top10_holder_pct": 100.0,
+    "deployer_token_count": 500,
+    "deployer_age_days": 1825,
+    "goplus_tax_pct": 100.0,
+    "rugcheck_score": 100.0,
+    "birdeye_trade_count_24h": 50_000,
+    "birdeye_unique_wallets_24h": 20_000,
+    "twitter_followers": 1_000_000,
+    "twitter_account_age_days": 5475,
+    "twitter_engagement_rate": 0.3,
+    "twitter_bot_follower_pct": 100.0,
+    "github_commits_30d": 500,
+    "github_contributors": 100,
+    "telegram_member_count": 500_000,
+    "telegram_active_ratio": 1.0,
+    "token_age_days": 1825,
+    "pair_age_days": 1825,
+    "sector_code": 20,
+    "copycat_score": 1.0,
+    "lp_lock_duration_days": 3650,
+    "sell_pressure_score": 1.0,
+}
