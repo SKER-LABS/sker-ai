@@ -105,3 +105,87 @@ class ThreatScorer:
             flags=flags,
             confidence=round(confidence, 3),
         )
+
+    def _score_onchain(self, store: FeatureStore, vec: np.ndarray, flags: list) -> float:
+        """On-chain data risk. Holder concentration is the key signal."""
+        score = 5.0  # default (neutral when no data)
+
+        top1 = store.get("top1_holder_pct")
+        top10 = store.get("top10_holder_pct")
+
+        if not np.isnan(top1):
+            # top1 > 50% is high rug pull risk
+            if top1 > 50:
+                score += 3.5
+                flags.append("TOP1_HOLDER_OVER_50PCT")
+            elif top1 > 30:
+                score += 2.0
+                flags.append("TOP1_HOLDER_OVER_30PCT")
+            elif top1 > 15:
+                score += 0.8
+
+        if not np.isnan(top10):
+            if top10 > 80:
+                score += 2.0
+                flags.append("TOP10_CONCENTRATION_CRITICAL")
+            elif top10 > 60:
+                score += 1.0
+
+        # bundle detection
+        bundle = store.get("bundle_detected")
+        if not np.isnan(bundle) and bundle > 0:
+            score += 1.5
+            flags.append("BUNDLE_DETECTED")
+
+        # deployer profile
+        deployer_count = store.get("deployer_token_count")
+        deployer_age = store.get("deployer_age_days")
+
+        if not np.isnan(deployer_count) and deployer_count > 10:
+            score += 1.0
+            flags.append("SERIAL_DEPLOYER")
+
+        if not np.isnan(deployer_age) and deployer_age < 7:
+            score += 0.8
+            flags.append("NEW_DEPLOYER")
+
+        # buy/sell ratio
+        bs_ratio = store.get("buy_sell_ratio_24h")
+        if not np.isnan(bs_ratio) and bs_ratio < 0.3:
+            score += 1.2
+            flags.append("HEAVY_SELL_PRESSURE")
+
+        return np.clip(score, 1.0, 10.0)
+
+    def _score_security(self, store: FeatureStore, vec: np.ndarray, flags: list) -> float:
+        """Security API results (GoPlus, Rugcheck, Jupiter)"""
+        score = 4.0
+
+        honeypot = store.get("goplus_honeypot")
+        if not np.isnan(honeypot) and honeypot > 0:
+            score += 5.0
+            flags.append("HONEYPOT_DETECTED")
+
+        tax = store.get("goplus_tax_pct")
+        if not np.isnan(tax):
+            if tax > 10:
+                score += 2.5
+                flags.append("HIGH_TAX")
+            elif tax > 5:
+                score += 1.0
+
+        rugcheck = store.get("rugcheck_score")
+        if not np.isnan(rugcheck):
+            # higher rugcheck score = more dangerous (0-100)
+            score += (rugcheck / 100) * 3.0
+
+        jupiter = store.get("jupiter_verified")
+        if not np.isnan(jupiter) and jupiter > 0:
+            score -= 1.5  # Jupiter verified = risk reduction
+
+        mint = store.get("mint_authority_revoked")
+        if not np.isnan(mint) and mint < 1:
+            score += 1.5
+            flags.append("MINT_AUTHORITY_ACTIVE")
+
+        return np.clip(score, 1.0, 10.0)
