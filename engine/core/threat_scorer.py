@@ -189,3 +189,108 @@ class ThreatScorer:
             flags.append("MINT_AUTHORITY_ACTIVE")
 
         return np.clip(score, 1.0, 10.0)
+
+    def _score_social(self, store: FeatureStore, vec: np.ndarray, flags: list) -> float:
+        """OSINT social trust score"""
+        score = 5.0
+
+        followers = store.get("twitter_followers")
+        age = store.get("twitter_account_age_days")
+        engagement = store.get("twitter_engagement_rate")
+        bot_pct = store.get("twitter_bot_follower_pct")
+
+        # follower vs account age — detect rapid follower growth
+        if not np.isnan(followers) and not np.isnan(age):
+            if age > 0:
+                growth_rate = followers / age
+                if growth_rate > 500 and age < 90:
+                    score += 2.0
+                    flags.append("SUSPICIOUS_FOLLOWER_GROWTH")
+
+        if not np.isnan(bot_pct) and bot_pct > 40:
+            score += 2.0
+            flags.append("HIGH_BOT_FOLLOWERS")
+
+        if not np.isnan(engagement) and engagement < 0.005:
+            score += 1.0  # very low engagement = ghost account
+
+        # GitHub
+        commits = store.get("github_commits_30d")
+        has_code = store.get("github_has_real_code")
+
+        if not np.isnan(has_code) and has_code < 1:
+            score += 1.0
+            flags.append("NO_REAL_CODE")
+        elif not np.isnan(commits) and commits > 20:
+            score -= 1.5  # active development = positive signal
+
+        # scam DB
+        scam = store.get("scam_db_match")
+        if not np.isnan(scam) and scam > 0:
+            score += 3.0
+            flags.append("SCAM_DB_MATCH")
+
+        return np.clip(score, 1.0, 10.0)
+
+    def _score_liquidity(self, store: FeatureStore, vec: np.ndarray, flags: list) -> float:
+        """Liquidity health assessment"""
+        score = 4.0
+
+        liq_ratio = store.get("liq_mcap_ratio")
+        if not np.isnan(liq_ratio):
+            if liq_ratio < 0.03:
+                score += 3.0
+                flags.append("EXTREMELY_LOW_LIQUIDITY")
+            elif liq_ratio < 0.1:
+                score += 1.5
+
+        lp_locked = store.get("lp_locked")
+        if not np.isnan(lp_locked) and lp_locked < 1:
+            score += 2.0
+            flags.append("LP_NOT_LOCKED")
+
+        lp_duration = store.get("lp_lock_duration_days")
+        if not np.isnan(lp_duration) and lp_duration < 30:
+            score += 1.0
+            flags.append("SHORT_LP_LOCK")
+
+        sell_pressure = store.get("sell_pressure_score")
+        if not np.isnan(sell_pressure) and sell_pressure > 0.7:
+            score += 1.5
+
+        vol_ratio = store.get("vol_mcap_ratio")
+        if not np.isnan(vol_ratio):
+            # abnormal volume — potential wash trading
+            if vol_ratio > 3.0:
+                score += 1.5
+                flags.append("ABNORMAL_VOLUME")
+
+        return np.clip(score, 1.0, 10.0)
+
+    def _score_meta(self, store: FeatureStore, vec: np.ndarray, flags: list) -> float:
+        """Meta information (token age, copycat, etc.)"""
+        score = 3.0
+
+        token_age = store.get("token_age_days")
+        if not np.isnan(token_age):
+            if token_age < 1:
+                score += 2.5
+                flags.append("BRAND_NEW_TOKEN")
+            elif token_age < 7:
+                score += 1.5
+            elif token_age > 180:
+                score -= 1.0  # older token = relatively safer
+
+        copycat = store.get("copycat_score")
+        if not np.isnan(copycat) and copycat > 0.7:
+            score += 2.0
+            flags.append("COPYCAT_SUSPECTED")
+
+        return np.clip(score, 1.0, 10.0)
+
+    @staticmethod
+    def _to_grade(score: float) -> str:
+        for threshold, grade in _GRADE_MAP:
+            if score <= threshold:
+                return grade
+        return "F"
