@@ -10,7 +10,7 @@ class RPCConfig(BaseModel):
     helius_api_key: str = os.getenv("HELIUS_API_KEY", "")
     fallback_rpc: str = os.getenv("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com")
     max_retries: int = 3
-    timeout_ms: int = 5000
+    timeout_ms: int = 8000
 
 
 class OSINTConfig(BaseModel):
