@@ -177,7 +177,7 @@ class OnchainPipeline:
         if not txs:
             return {}
 
-        # first tx fee payer = deployer
+        # first tx fee payer is the deployer wallet
         deployer = txs[0].get("feePayer", "")
         if not deployer:
             return {}
