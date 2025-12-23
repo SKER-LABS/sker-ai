@@ -73,7 +73,7 @@ class SecurityAggregator:
         max_tax = max(buy_tax, sell_tax) * 100  # convert to percent
 
         return {
-            "goplus_honeypot": 1.0 if honeypot == "1" else 0.0,
+            "goplus_honeypot": 1.0 if str(honeypot) == "1" else 0.0,
             "goplus_tax_pct": max_tax,
         }
 
