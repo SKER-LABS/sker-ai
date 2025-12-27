@@ -6,3 +6,8 @@ venv/
 .venv/
 node_modules/
 dist/
+*.egg-info/
+.pytest_cache/
+coverage/
+.coverage
+htmlcov/
