@@ -121,7 +121,7 @@ class SectorClassifier:
                 best_keywords = matched
 
         # below minimum threshold = unknown
-        # FIXME: tighten threshold — current false positive rate is a bit high
+        # TODO: tighten threshold — current false positive rate is a bit high
         if best_score < 1.5:
             return SectorResult(code=0, label="unknown", confidence=0.0, matched_keywords=[])
 
