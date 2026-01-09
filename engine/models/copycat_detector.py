@@ -46,6 +46,9 @@ _KNOWN_TOKENS = [
     ("Pepe", "PEPE"),
     ("Shiba Inu", "SHIB"),
     ("Dogecoin", "DOGE"),
+    ("Worldcoin", "WLD"),
+    ("Chainlink", "LINK"),
+    ("Uniswap", "UNI"),
 ]
 
 # common copycat patterns
