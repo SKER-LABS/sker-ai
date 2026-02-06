@@ -24,9 +24,9 @@ class OSINTConfig(BaseModel):
 
 class ScoringConfig(BaseModel):
     # weights — v3 bumped holder concentration weight (rug detection 78% -> 91%)
-    w_onchain: float = 0.30
+    w_onchain: float = 0.35
     w_security: float = 0.25
-    w_social: float = 0.25
+    w_social: float = 0.20
     w_liquidity: float = 0.15
     w_meta: float = 0.05
     # threshold
