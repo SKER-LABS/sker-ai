@@ -93,7 +93,7 @@ class CopycatDetector:
                 best_score = combined
                 best_match = known_name
 
-        is_copycat = best_score > 0.65
+        is_copycat = best_score > 0.60
 
         if is_copycat:
             logger.info(f"Copycat detected: {name} ({symbol}) -> {best_match} (score={best_score:.2f})")
