@@ -241,7 +241,7 @@ class OnchainPipeline:
             slot = tx.get("slot", 0)
             slot_counts[slot] = slot_counts.get(slot, 0) + 1
 
-        return any(count >= 4 for count in slot_counts.values())
+        return any(count >= 3 for count in slot_counts.values())
 
     async def _fetch_trade_pressure(self, ca: str) -> dict[str, float]:
         """24h trade pressure analysis"""
