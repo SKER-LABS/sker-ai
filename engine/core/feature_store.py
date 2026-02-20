@@ -78,7 +78,7 @@ class FeatureStore:
         idx = FEATURE_NAMES.index(name)
         return self._vector[idx]
 
-    def bulk_set(self, data: dict[str, float]) -> None:
+    def bulk_set(self, data: dict[str, float | int]) -> None:
         for k, v in data.items():
             if k in FEATURE_NAMES:
                 self.set(k, v)
@@ -127,7 +127,7 @@ class FeatureStore:
         vec[nan_mask] = 0.5
         return vec
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, any]:
         return {
             "ca": self.ca,
             "fill_rate": round(self.fill_rate, 3),
