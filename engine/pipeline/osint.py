@@ -80,7 +80,7 @@ class OSINTCrawler:
         )
 
         if search_resp.status_code != 200:
-            # rate limited — retry with name
+            # symbol lookup rate limited — fallback to project name
             search_resp = await client.get(
                 "https://api.twitter.com/2/users/by",
                 params={"usernames": name.lower().replace(" ", "")},
