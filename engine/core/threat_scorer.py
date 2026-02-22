@@ -45,7 +45,7 @@ class ThreatScorer:
     Calculates sub-scores per 5 categories then weighted sum.
     """
 
-    def __init__(self, weights: Optional[dict] = None):
+    def __init__(self, weights: Optional[dict[str, float]] = None):
         sc = config.scoring
         self.weights = weights or {
             "onchain": sc.w_onchain,
@@ -83,7 +83,7 @@ class ThreatScorer:
             + meta_score * self.weights["meta"]
         )
 
-        # critical flag adjustments — honeypot forces 8+
+        # critical flag adjustments — override final score floor for severe threats
         if "HONEYPOT_DETECTED" in flags:
             raw = max(raw, 8.5)
         if "MINT_AUTHORITY_ACTIVE" in flags and "LP_NOT_LOCKED" in flags:
