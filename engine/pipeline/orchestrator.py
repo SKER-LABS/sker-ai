@@ -134,7 +134,7 @@ class AnalysisOrchestrator:
         _cache[ca] = (report, time.time())
         # cache size limit — prevent memory leak
         if len(_cache) > 500:
-            # simple half-eviction instead of LRU — FIXME: implement proper LRU
+            # half-eviction instead of LRU — FIXME: implement proper LRU
             oldest_keys = sorted(_cache.keys(), key=lambda k: _cache[k][1])[:250]
             for k in oldest_keys:
                 del _cache[k]
