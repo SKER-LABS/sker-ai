@@ -85,7 +85,7 @@ class CacheManager:
         }
 
     def cleanup_expired(self) -> int:
-        """Batch cleanup of expired entries"""
+        """Batch cleanup of expired entries. Called periodically by background task."""
         now = time.time()
         expired = [
             k for k, (_, ts, ttl) in self._store.items()
@@ -96,3 +96,15 @@ class CacheManager:
         if expired:
             logger.debug(f"Expired cache cleaned: {len(expired)} entries")
         return len(expired)
+
+    def __len__(self) -> int:
+        return len(self._store)
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._store and not self._is_expired(key)
+
+    def _is_expired(self, key: str) -> bool:
+        if key not in self._store:
+            return True
+        _, ts, ttl = self._store[key]
+        return time.time() - ts > ttl
