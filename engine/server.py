@@ -94,3 +94,14 @@ async def classify_input(req: ClassifyRequest):
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "0.4.1"}
+
+
+@app.get("/stats")
+async def stats():
+    """Cache and engine performance statistics"""
+    if not orchestrator:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    return {
+        "cache": orchestrator.cache.stats,
+        "version": "0.4.1",
+    }
