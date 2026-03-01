@@ -36,7 +36,7 @@ class ScoringConfig(BaseModel):
 
 class RedisConfig(BaseModel):
     url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-    cache_ttl_sec: int = 300  # 5min cache — considering on-chain data volatility
+    cache_ttl_sec: int = 300  # 5min — balance between freshness and API rate limits
     signal_ttl_sec: int = 3600
 
 
