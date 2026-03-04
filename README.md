@@ -102,8 +102,8 @@ engine/
 ### Installation
 
 ```bash
-git clone https://github.com/SKER-LABS/sker-engine.git
-cd sker-engine
+git clone https://github.com/SKER-LABS/sker-ai.git
+cd sker-ai
 pip install -r engine/requirements.txt
 ```
 
@@ -157,4 +157,4 @@ Helius · Jupiter · DexScreener · GoPlus · Rugcheck · CoinGecko · Birdeye �
 
 ## License
 
-Proprietary. All rights reserved.
+MIT License. See [LICENSE](LICENSE) for details.
