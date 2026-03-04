@@ -11,3 +11,23 @@ dist/
 coverage/
 .coverage
 htmlcov/
+
+# Frontend — never commit to this repo
+src/
+public/
+next.config.*
+tsconfig.*
+tailwind.config.*
+postcss.config.*
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+*.tsx
+*.jsx
+*.css
+*.scss
+.next/
+out/
+build/
