@@ -12,7 +12,7 @@
 [![Twitter](https://img.shields.io/badge/@skerdotfun-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/skerdotfun)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-
+CA: FhVgqvbHASCkoqFsQe6PySvZbgup2EEj57yp2MhBpump
 </div>
 
 ---
