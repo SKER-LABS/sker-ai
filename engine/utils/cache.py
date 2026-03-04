@@ -108,3 +108,13 @@ class CacheManager:
             return True
         _, ts, ttl = self._store[key]
         return time.time() - ts > ttl
+
+
+# WIP: Redis backend integration
+# class RedisCacheBackend:
+#     """Production cache backend using Redis.
+#     Replaces in-memory LRU for multi-instance deployments."""
+#     def __init__(self, redis_url: str, prefix: str = "sker:cache:"):
+#         self.prefix = prefix
+#         # TODO: implement redis connection pool
+#         pass
